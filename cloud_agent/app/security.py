@@ -51,7 +51,14 @@ class WebhookVerifier:
         if not timestamp or not signature:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing Slack headers")
 
-        if abs(time.time() - int(timestamp)) > 60 * 5:
+        try:
+            ts_int = int(timestamp)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Slack timestamp"
+            ) from exc
+
+        if abs(time.time() - ts_int) > 60 * 5:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Stale Slack request")
 
         base = f"v0:{timestamp}:{body.decode('utf-8')}"
