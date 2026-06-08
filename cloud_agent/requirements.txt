@@ -1,4 +1,6 @@
 fastapi
 httpx
 pydantic-settings
+SQLAlchemy
+psycopg[binary]
 uvicorn[standard]

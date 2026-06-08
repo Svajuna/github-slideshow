@@ -5,11 +5,13 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from .config import get_settings
+from .database import init_db
 from .dispatcher import Dispatcher
 from .integrations.jira import JiraClient
 from .integrations.linear import LinearClient
 from .integrations.slack import SlackClient
 from .parser import parse_event
+from .routes import products_router, suppliers_router
 from .rules import default_rules
 from .schemas import WebhookResponse
 from .security import WebhookVerifier
@@ -33,6 +35,14 @@ dispatcher = Dispatcher(
     ),
     rules=default_rules(default_channel=settings.slack_default_channel),
 )
+app.state.dispatcher = dispatcher
+app.include_router(suppliers_router)
+app.include_router(products_router)
+
+
+@app.on_event("startup")
+def startup() -> None:
+    init_db()
 
 
 @app.get("/health")
