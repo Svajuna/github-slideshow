@@ -6,6 +6,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_prefix="AGENT_", extra="ignore")
 
+    database_url: str = "sqlite:///./cloud_agent.db"
+
     github_webhook_secret: str = ""
 
     slack_signing_secret: str = ""

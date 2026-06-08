@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class NormalizedEvent(BaseModel):
-    source: Literal["github", "slack", "jira", "linear", "unknown"]
+    source: Literal["github", "slack", "jira", "linear", "platform", "unknown"]
     event_type: str
     action: str = "unknown"
     title: str = ""

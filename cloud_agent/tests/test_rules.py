@@ -27,6 +27,38 @@ class RulesTestCase(unittest.TestCase):
         self.assertEqual(actions[0].kind, "slack_message")
         self.assertEqual(actions[1].kind, "jira_issue")
 
+    def test_selects_actions_for_new_supplier(self) -> None:
+        rules = default_rules(default_channel="#ops")
+        event = NormalizedEvent(
+            source="platform",
+            event_type="supplier.created",
+            action="created",
+            title="Shenzhen Precision Parts Co.",
+            actor="Li Wei",
+            entity_id="supplier-1",
+            url="/suppliers/supplier-1",
+            payload={},
+        )
+
+        actions = select_actions(event, rules)
+        self.assertEqual([action.kind for action in actions], ["slack_message", "jira_issue"])
+
+    def test_selects_actions_for_product_import(self) -> None:
+        rules = default_rules(default_channel="#ops")
+        event = NormalizedEvent(
+            source="platform",
+            event_type="products.imported",
+            action="imported",
+            title="12 products imported for Shenzhen Precision Parts Co.",
+            actor="Shenzhen Precision Parts Co.",
+            entity_id="supplier-1",
+            url="/products?supplier_id=supplier-1",
+            payload={},
+        )
+
+        actions = select_actions(event, rules)
+        self.assertEqual([action.kind for action in actions], ["slack_message", "jira_issue"])
+
     def test_renders_templates(self) -> None:
         action = ActionSpec(
             kind="slack_message",

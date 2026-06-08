@@ -21,6 +21,51 @@ class _SafeFormatDict(dict):
 def default_rules(default_channel: str) -> list[Rule]:
     return [
         Rule(
+            name="platform-supplier-created-notify-slack-and-create-jira",
+            when=lambda event: event.source == "platform" and event.event_type == "supplier.created",
+            actions=(
+                ActionSpec(
+                    kind="slack_message",
+                    params={
+                        "channel": default_channel,
+                        "text": (
+                            "New supplier registered: *{title}* "
+                            "(contact={actor}, supplier_id={entity_id})"
+                        ),
+                    },
+                ),
+                ActionSpec(
+                    kind="jira_issue",
+                    params={
+                        "summary": "Onboard supplier: {title}",
+                        "description": "Review and verify supplier profile: {url}",
+                        "issue_type": "Task",
+                    },
+                ),
+            ),
+        ),
+        Rule(
+            name="platform-products-imported-notify-slack-and-create-jira",
+            when=lambda event: event.source == "platform" and event.event_type == "products.imported",
+            actions=(
+                ActionSpec(
+                    kind="slack_message",
+                    params={
+                        "channel": default_channel,
+                        "text": "{title} (supplier_id={entity_id})",
+                    },
+                ),
+                ActionSpec(
+                    kind="jira_issue",
+                    params={
+                        "summary": "Validate product import: {title}",
+                        "description": "Check imported catalog records and supplier mapping: {url}",
+                        "issue_type": "Task",
+                    },
+                ),
+            ),
+        ),
+        Rule(
             name="github-pr-opened-notify-slack-and-create-jira",
             when=lambda event: event.source == "github"
             and event.event_type == "pull_request"
